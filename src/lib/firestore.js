@@ -16,7 +16,7 @@ export const createPost = async (textPost) => {
   addDoc(collection(db, 'posts'), {
     name: auth.currentUser.displayName,
     author: auth.currentUser.uid,
-    texto: textPost,
+    text: textPost,
     like: [],
   })
     .then(() => true)
@@ -26,11 +26,11 @@ export const createPost = async (textPost) => {
 export const postScreen = async () => {
   try {
     const querySnapshot = await getDocs(collection(db, 'posts'));
-    const arrayVazio = [];
+    const arrayPost = [];
     querySnapshot.forEach((posts) => {
-      arrayVazio.push({ ...posts.data(), id: posts.id });
+      arrayPost.push({ ...posts.data(), id: posts.id });
     });
-    console.log();
+    return arrayPost;
   } catch (e) {
     console.log(e);
   }

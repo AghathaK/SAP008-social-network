@@ -5,11 +5,9 @@
 }
 .container{
     display: flex;
-    margin: 0% 10% 0% 20%;
-    padding: 1% 0% 1% 0%;
+    padding: 10% 10% 10% 10%;
     height: 100%;
     width: 60%;
-    border-radius: 10%;
     background-image: url(../../img/back.jpg);
     background-repeat: no-repeat;
     justify-content: center;
@@ -24,7 +22,7 @@
     background-color: rgba(255, 255 , 255, 0.87) ;
     width: 70%;
     border-radius: 40px;
-    margin: 1% 5% 1% 5%;
+    padding: 10% 10% 10% 10%;
 }
 .form{
     height: 100%;
@@ -33,15 +31,15 @@
 }
 .logo{
     height: 65%;
-    width: 100%;
+    width: 250%;
 }
 .emailSenha{
-    width: 60%;
+    width: 150%;
     height: 4vh;
     text-align: center;
     border-color: black;
     border-radius: 1vh;
-    margin: 2%;
+    margin: 3%;
 }
 .msgErro{
     color: red;
@@ -61,17 +59,17 @@
     border: 0.3vh solid #1FA48C;
     font-size: 100%;
     font-weight: bold;
-    padding: 1% 7%;
+    padding: 4% 15%;
     background: linear-gradient(to right, #91ebd9, #5dd6c0, #28c4a7);
     cursor: pointer;
-    margin-top: -15%;
+    margin: 45%;
 }
 .textEntrarGlg{
     font-weight: bold;
 }
 .loginGoogle img{
-    height: 25px;
-    width: 25px;
+    height: 100%;
+    width: 20%;
 }
 .sobrepage{
     color: grey;
