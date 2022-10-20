@@ -8,7 +8,7 @@ import {
   getAuth,
 } from './firebase.js';
 
-const auth = getAuth(app);
+export const auth = getAuth(app);
 
 export const nameUser = () => auth.currentUser.displayName;
 

@@ -2,7 +2,7 @@
 /* eslint-disable no-console */
 
 import { logOutUser } from '../../lib/auth.js';
-import { createPost, postScreen } from '../../lib/firestore.js';
+import { createPost, postScreen, auth } from '../../lib/firestore.js';
 
 export default () => {
   const sectionFeed = document.createElement('div');
@@ -17,7 +17,7 @@ export default () => {
         </ul>
       </nav>
       <section class='msgBoasvindas'>
-        <p> Olá, Dona do Cafofo!</p>
+        <p> Olá, ${auth.currentUser.displayName}!</p>
       </section>
       <div clas='corpotimeline'>
         <form id='create-Post'>
@@ -45,12 +45,10 @@ export default () => {
     const printArray = await postScreen();
     const postsTemplate = printArray.map((posts) => {
       const postTemplate = `
-      < div class = "post" >
       <section class="postTimeline">
         <p id="userName">${posts.name}</p>
         <p id="textPost">${posts.text}</p>
       </section>
-      </div >
     `;
       return postTemplate;
     }).join('');
