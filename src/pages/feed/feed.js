@@ -52,7 +52,7 @@ export default () => {
     `;
       return postTemplate;
     }).join('');
-    sectionFeed.querySelector('#feedPost').innerHTML += postsTemplate;
+    sectionFeed.querySelector('#feedPost').innerHTML = postsTemplate;
 
     const createform = sectionFeed.querySelector('#create-Post');
     const textAreaPost = sectionFeed.querySelector('#text-publish');
@@ -67,12 +67,10 @@ export default () => {
 
     createform.addEventListener('submit', (e) => {
       e.preventDefault();
-      console.log('cheguei aqui');
       const postText = textAreaPost.value;
       createPost(postText)
         .then(() => {
-          console.log('deu bom');
-          postScreen();
+          document.getElementById('feedPost').innerHTML = printPost();
         })
         .catch((error) => {
           console.log(error);
