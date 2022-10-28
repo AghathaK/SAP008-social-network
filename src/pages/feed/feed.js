@@ -70,6 +70,7 @@ export default () => {
     const textAreaPost = sectionFeed.querySelector('#text-publish');
     const btnLogOut = sectionFeed.querySelector('#logOut');
     const deletePost = sectionFeed.querySelector('#btn-delete');
+    const btnLike = sectionFeed.querySelector('#btn-like');
 
     btnLogOut.addEventListener('click', () => {
       logOutUser().then(() => {
