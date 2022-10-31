@@ -9,6 +9,9 @@ import {
   addDoc,
   getDocs,
   getAuth,
+  arrayUnion,
+  arrayRemove,
+  updateDoc,
 } from './firebase.js';
 
 export const auth = getAuth(app);
@@ -21,7 +24,7 @@ export const createPost = async (textPost) => {
     date: new Date().toLocaleDateString('pt-BR'),
     author: auth.currentUser.uid,
     text: textPost,
-    like: [],
+    likes: [],
   })
     .then(() => true)
     .catch((e) => { throw e; });
@@ -48,3 +51,17 @@ export const removePost = async (uid) => {
     console.log(error);
   }
 };
+
+export async function likePost(idPost, uidUser) {
+  const docRef = doc(db, 'posts', idPost);
+  return updateDoc(docRef, {
+    likes: arrayUnion(uidUser),
+  });
+}
+
+export async function deslikePost(idPost, uidUser) {
+  const docRef = doc(db, 'posts', idPost);
+  return updateDoc(docRef, {
+    likes: arrayRemove(uidUser),
+  });
+}

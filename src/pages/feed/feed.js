@@ -8,10 +8,12 @@ import {
   postScreen,
   auth,
   removePost,
+  deslikePost,
+  likePost,
 } from '../../lib/firestore.js';
 import { errorFire } from '../../lib/errorFirebase.js';
 
-export default () => {
+export default async () => {
   const sectionFeed = document.createElement('div');
   const contentFeed = `
     <div>
@@ -40,72 +42,85 @@ export default () => {
     </div>`;
   sectionFeed.innerHTML = contentFeed;
 
-  const printPost = async () => {
-    const printArray = await postScreen();
-    const postsTemplate = printArray
-      .map((posts) => {
-        const postTemplate = `
-      <section class='postTimeline'>
-        <div class="headerPost">
-          <p id='userName'>${posts.name}</p>
-          <p id='textPost'>${posts.date}</p>
-        </div>
-        <p id='textPost'>${posts.text}</p>
-        <p class='sectionBtn'>
-          <a class='btnDelete' id='btn-delete'><img src='../../img/delete.png' alt='Deletar'></a>
-          <a class='btnEditar' id='btn-editar'><img src='../../img/editar.png' alt='Editar'></a>
-        </p>
-      </section>
-      <section class='sectionBtnLikeDeslike'>
-        <a class='btnLike' id='btn-like'><img src='../../img/like.png' alt='Like'></a>
-        <a class='btnDeslike' id='btn-deslike'><img src='../../img/deslike.png' alt='Deslike'></a>
-      </section>
-    `;
-        return postTemplate;
-      })
-      .join('');
-    sectionFeed.querySelector('#post-feed').innerHTML = postsTemplate;
+  const createform = sectionFeed.querySelector('#create-Post');
+  const textAreaPost = sectionFeed.querySelector('#text-publish');
+  const btnLogOut = sectionFeed.querySelector('#logOut');
 
-    const createform = sectionFeed.querySelector('#create-Post');
-    const textAreaPost = sectionFeed.querySelector('#text-publish');
-    const btnLogOut = sectionFeed.querySelector('#logOut');
-    const deletePost = sectionFeed.querySelector('#btn-delete');
-    const btnLike = sectionFeed.querySelector('#btn-like');
-
-    btnLogOut.addEventListener('click', () => {
-      logOutUser().then(() => {
-        window.location.hash = '#home';
-      });
+  btnLogOut.addEventListener('click', () => {
+    logOutUser().then(() => {
+      window.location.hash = '#home';
     });
+  });
 
-    createform.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const postText = textAreaPost.value;
-      createPost(postText)
-        .then(async () => {
-          await printPost();
+  createform.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const postText = textAreaPost.value;
+    createPost(postText)
+      .then(async () => {
+        await printPosts();
+      })
+      .catch((error) => {
+        const errorCode = errorFire(error.code);
+        console.log(errorCode);
+      });
+
+  });
+  const posts = await postScreen();
+  printPosts(posts,sectionFeed);
+  return sectionFeed;
+}
+
+function printPosts(posts) {
+  const postsTemplate = posts
+    .map((post) => {
+      const liked = post.likes.includes(auth.currentUser.uid);
+      const postTemplate = `
+  <section class='postTimeline'>
+    <div class="headerPost">
+      <p id='userName'>${post.name}</p>
+      <p id='textPost'>${post.date}</p>
+    </div>
+    <p id='textPost'>${post.text}</p>
+    <p class='sectionBtn'>
+      <a class='btnDelete' id='btn-delete'><img src='../../img/delete.png' alt='Deletar'></a>
+      <a class='btnEditar' id='btn-editar'><img src='../../img/editar.png' alt='Editar'></a>
+    </p>
+  </section>
+  <section class='sectionBtnLikeDeslike'>
+    <button class='btnLike' data-liked='${liked}' data-post-id='${post.id}'><img src='../../img/like.png' alt='Like'></button>
+  </section>
+`;
+      return postTemplate;
+    })
+    .join('');
+  sectionFeed.querySelector('#post-feed').innerHTML = postsTemplate;
+  const deletePost = sectionFeed.querySelector('#btn-delete');
+  const btnLike = sectionFeed.querySelector('.btnLike');
+
+  btnLike.addEventListener('click', (e) => {
+    if (btnLike.dataset.liked === 'true') {
+      console.log('deslikePost');
+      deslikePost(btnLike.dataset.postId, auth.currentUser.uid);
+    }
+    else {
+      console.log('likePost');
+      likePost(btnLike.dataset.postId, auth.currentUser.uid);
+    }
+  });
+
+  deletePost.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (window.confirm('Deseja mesmo excluir este post?')) {
+      removePost()
+        .then(() => {
+          window.location.reload();
+          console.log('cheguei aqui');
         })
         .catch((error) => {
           const errorCode = errorFire(error.code);
           console.log(errorCode);
         });
-    });
-
-    deletePost.addEventListener('click', (e) => {
-      e.preventDefault();
-      if (window.confirm('Deseja mesmo excluir este post?')) {
-        removePost()
-          .then(() => {
-            window.location.reload();
-            console.log('cheguei aqui');
-          })
-          .catch((error) => {
-            const errorCode = errorFire(error.code);
-            console.log(errorCode);
-          });
-      }
-    });
-  };
-  printPost();
-  return sectionFeed;
-};
+    }
+  });
+}
+}
