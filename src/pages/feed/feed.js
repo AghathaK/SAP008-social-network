@@ -1,3 +1,5 @@
+/* eslint-disable brace-style */
+/* eslint-disable no-param-reassign */
 /* eslint-disable no-alert */
 /* eslint-disable spaced-comment */
 /* eslint-disable no-console */
@@ -6,6 +8,7 @@ import {
   createPost,
   postScreen,
   auth,
+  likePost,
   //removePost,
 } from '../../lib/firestore.js';
 import { errorFire } from '../../lib/errorFirebase.js';
@@ -46,7 +49,7 @@ function getPostsTemplate(posts) {
     const postTemplate = `
       <section>
 
-        <section class='postTimeline' id='${posts.id}'>
+        <section class='postTimeline' data-section-post-id=${post.id}>
           <div class='headerPost'>
             <p id='userName'>${post.name}</p>
             <p id='textPost'>${post.date}</p>
@@ -73,11 +76,13 @@ function getPostsTemplate(posts) {
           </p>
 
         </section>
-
-        <section class='sectionBtnLikeDeslike'>
-          <button class='btnLike' id='btn-like'><img src='../../img/like.png' alt='Like'></button>
-        </section>
-
+        
+        <section class='sectionBtnLike'>
+        <button class="btn-like" data-count-likes="${post.like.length}" data-like-btn="${post.id}" type="button">
+        <img class="like" ${post.like.includes(auth.currentUser.uid) ? 'src="../../img/coração.png"' : 'src="../../img/coraçãovazio.png"'} alt="purple-heart"> 
+        </button> 
+      <p id='count-likes' class='likes-count'>${post.like.length}</p>
+      </section>
     `; return postTemplate;
   }).join('');
 }
@@ -87,7 +92,6 @@ async function printPost(sectionFeed) {
   sectionFeed.querySelector('#post-feed').innerHTML = getPostsTemplate(posts);
   const deletePost = sectionFeed.querySelector('#btn-delete');
   const editPost = sectionFeed.querySelector('#btn-editar');
-
   //btn deletar
   deletePost.addEventListener('click', (e) => {
     const postId = e.currentTarget.dataset.postId;
@@ -95,13 +99,31 @@ async function printPost(sectionFeed) {
   });
 
   //btn editar
-  console.log(editPost);
   editPost.addEventListener('click', (e) => {
     const postId = e.currentTarget.dataset.postId;
     document.querySelector(`#${postId} .modal-edit`).style.display = 'flex';
   });
 
   //btn like e deslike
+  document.querySelectorAll('#btn-like').forEach((button) => {
+    button.addEventListener('click', async (e) => {
+      const postId = e.currentTarget.dataset.like;
+      const post = await postScreen(postId);
+      const section = getContentFeedTemplate.querySelector(`[data-section-post-id='${postId}']`);
+      const img = e.target;
+
+      likePost(post, postId)
+        .then((resultado) => {
+          if (resultado.liked) {
+            section.querySelector('#count-likes').innerText = resultado.count;
+            img.setAttribute('src', '../../img/coração.png');
+          } else {
+            section.querySelector('#count-likes').innerText = resultado.count;
+            img.setAttribute('src', '../../img/coraçãovazio.png');
+          }
+        });
+    });
+  });
 }
 
 export default () => {

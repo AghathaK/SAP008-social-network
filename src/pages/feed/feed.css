@@ -173,14 +173,14 @@
         width: 30px;
         height: 25px;
     }
-    .sectionBtnLikeDeslike img{
+    .like img{
         margin: 2% 0% 1% 0%;
         height: 20px;
         width: 30px;
         padding: 0;
         justify-content: flex-end;
     }
-    .btnLike{
+    .btn-like{
         margin: 0% 0% 0% 5%;
     }
 }
