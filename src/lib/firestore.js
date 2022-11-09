@@ -10,9 +10,12 @@ import {
   getDocs,
   getAuth,
   updateDoc,
+  getFirestore,
 } from './firebase.js';
 
 export const auth = getAuth(app);
+
+export const dataBase = getFirestore(app);
 
 export const current = () => auth.currentUser;
 
@@ -52,4 +55,20 @@ export const removePost = async (postId) => {
 
 export const editPost = async (postId, newText) => {
   updateDoc(doc(db, 'posts', postId), { text: newText });
+};
+
+export const likePost = async (postId, userId) => {
+  const post = await postScreen(postId);
+  let likes = post.like;
+  const liking = !likes.includes(userId);
+
+  if (liking) {
+    likes.push(userId);
+  } else {
+    likes = likes.filter((id) => id !== userId);
+  }
+
+  return updateDoc(doc(dataBase, 'posts', postId), {
+    like: likes,
+  });
 };

@@ -9,6 +9,8 @@ import {
   removePost,
   editPost,
   nameUser,
+  likePost,
+  auth,
 } from '../../lib/firestore.js';
 import { errorFire } from '../../lib/errorFirebase.js';
 
@@ -45,7 +47,7 @@ const getPostsTemplate = (posts) => {
           <section>${crud}</section>
         </section>
         <section class='sectionBtnLikeDeslike'>
-          <button class='btnLike' id='btn-like'><img src='../../img/like.png' alt='Like'></button>
+          <button class='btnLike' id='btn-like' data-action='like'><img src='../../img/like.png' alt='Like'></button>
         </section>`;
   })
     .join('');
@@ -108,6 +110,8 @@ export default () => {
     const actionElement = element.dataset.action;
     const id = element.dataset.id;
     const modalDelete = elementPost.querySelector('.modal-confirm');
+    const postElement = sectionFeed.querySelector(`[data-id="${id}"]`);
+    const like = sectionFeed.querySelector('.btnLike');
 
     /*
     const edit = (id) => {
@@ -120,6 +124,17 @@ export default () => {
         });
     };
     */
+    const mostraLike = () => {
+      const conta = postElement.querySelector('.like-number').textContent;
+      const soma = Number(conta) + 1;
+      postElement.querySelector('.like-number').innerHTML = soma;
+    };
+
+    const esconderLike = () => {
+      const conta = postElement.querySelector('.like-number').textContent;
+      const soma = Number(conta) - 1;
+      postElement.querySelector('.like-number').innerHTML = soma;
+    };
 
     switch (actionElement) {
       case 'delete-Post':
@@ -138,6 +153,16 @@ export default () => {
         break;
       case 'editar':
         editPost(id);
+        break;
+      case 'like':
+        likePost(id, auth.currentUser.uid).then(() => mostraLike());
+        like.src = '../../img/like';
+        like.dataset.action = 'deslike';
+        break;
+      case 'deslike':
+        likePost(id, auth.currentUser.uid).then(() => esconderLike());
+        like.src = '../../img/deslike';
+        like.dataset.action = 'like';
         break;
       default:
         console.log('clicou em qualquer outra coisa');
