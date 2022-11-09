@@ -1,3 +1,4 @@
+/* eslint-disable no-shadow */
 /* eslint-disable consistent-return */
 /* eslint-disable no-console */
 import { app, db } from './configuration.js';
@@ -58,7 +59,9 @@ export const editPost = async (postId, newText) => {
 };
 
 export const likePost = async (postId, userId) => {
-  const post = await postScreen(postId);
+  const posts = await postScreen(postId);
+  console.log(posts, postId);
+  const post = posts.filter((post) => post.id === postId)[0];
   let likes = post.like;
   const liking = !likes.includes(userId);
 

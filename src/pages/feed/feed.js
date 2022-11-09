@@ -47,8 +47,9 @@ const getPostsTemplate = (posts) => {
           <section>${crud}</section>
         </section>
         <section class='sectionBtnLikeDeslike'>
-          <button class='btnLike' id='btn-like' data-action='like'><img src='../../img/like.png' alt='Like'></button>
-        </section>`;
+          <button class='btnLike' data-id='${post.id}' data-action='like'><img src='../../img/like.png' alt='Like'></button>
+        <div class='like-number'></div>
+          </section>`;
   })
     .join('');
   return postTemplate;
@@ -109,8 +110,8 @@ export default () => {
     const element = e.target;
     const actionElement = element.dataset.action;
     const id = element.dataset.id;
+    console.log(id);
     const modalDelete = elementPost.querySelector('.modal-confirm');
-    const postElement = sectionFeed.querySelector(`[data-id="${id}"]`);
     const like = sectionFeed.querySelector('.btnLike');
 
     /*
@@ -125,15 +126,15 @@ export default () => {
     };
     */
     const mostraLike = () => {
-      const conta = postElement.querySelector('.like-number').textContent;
+      const conta = sectionFeed.querySelector('.like-number').textContent;
       const soma = Number(conta) + 1;
-      postElement.querySelector('.like-number').innerHTML = soma;
+      sectionFeed.querySelector('.like-number').textContent = soma;
     };
 
     const esconderLike = () => {
-      const conta = postElement.querySelector('.like-number').textContent;
+      const conta = sectionFeed.querySelector('.like-number').textContent;
       const soma = Number(conta) - 1;
-      postElement.querySelector('.like-number').innerHTML = soma;
+      sectionFeed.querySelector('.like-number').textContent = soma;
     };
 
     switch (actionElement) {
