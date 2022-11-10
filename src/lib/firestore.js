@@ -1,3 +1,4 @@
+/* eslint-disable no-shadow */
 /* eslint-disable consistent-return */
 /* eslint-disable no-console */
 import { app, db } from './configuration.js';
@@ -10,9 +11,13 @@ import {
   getDocs,
   getAuth,
   updateDoc,
+  getFirestore,
+  getDoc,
 } from './firebase.js';
 
 export const auth = getAuth(app);
+
+export const dataBase = getFirestore(app);
 
 export const current = () => auth.currentUser;
 
@@ -51,4 +56,30 @@ export const removePost = async (id) => {
 
 export const editPost = async (postId, newText) => {
   updateDoc(doc(db, 'posts', postId), { text: newText });
+};
+
+export const getPostById = async (postID) => {
+  const docRef = doc(dataBase, 'posts', postID);
+  const docSnap = await getDoc(docRef);
+  return docSnap.data();
+};
+
+export const likePost = async (postId, userId) => {
+  const posts = await postScreen(postId);
+  console.log(posts, postId);
+  const post = await getPostById(postId);
+  // eslint-disable-next-line spaced-comment
+  /*const post = posts.filter((post) => post.id === postId)[0];*/
+  let likes = post.like;
+  const liking = !likes.includes(userId);
+
+  if (liking) {
+    likes.push(userId);
+  } else {
+    likes = likes.filter((id) => id !== userId);
+  }
+
+  return updateDoc(doc(dataBase, 'posts', postId), {
+    like: likes,
+  });
 };

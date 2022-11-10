@@ -9,6 +9,8 @@ import {
   removePost,
   editPost,
   nameUser,
+  auth,
+  likePost,
 } from '../../lib/firestore.js';
 import { errorFire } from '../../lib/errorFirebase.js';
 
@@ -51,8 +53,10 @@ const getPostsTemplate = (posts) => {
           <section>${crud}</section>
         </section>
         <section class='sectionBtnLikeDeslike'>
-          <button class='btnLike' id='btn-like'><img src='../../img/like.png' alt='Like'></button>
-      </section>`;
+          <button class='btnLike' data-count-likes="${post.like.length}" data-id='${post.id}' data-action='like' data-banana='deslike' style="font-size:24px">
+          <i class="fa fa-heart-o"></i></button>
+        <div class='like-number'>${post.like.length}</div>
+          </section>`;
   })
     .join('');
   return postTemplate;
@@ -116,6 +120,8 @@ export default () => {
     const modalDelete = elementPost.querySelector('.modal-confirm');
     const postElement = elementPost.querySelector(`.sectionPost[data-id='${id}']`);// eslint-disable-line
     const modalEdit = elementPost.querySelector('.modal-edit');
+    const btnLike = elementPost.querySelector('.fa-heart-o');
+    const btnDeslike = element.dataset.banana;
 
     const deletePost = () => {
       removePost(id)
@@ -137,7 +143,28 @@ export default () => {
         });
     };
 
+    const mostraLike = () => {
+      const conta = sectionFeed.querySelector('.like-number').textContent;
+      const soma = Number(conta) + 1;
+      sectionFeed.querySelector('.like-number').textContent = soma;
+    };
+
+    const esconderLike = () => {
+      const conta = sectionFeed.querySelector('.like-number').textContent;
+      const soma = Number(conta) - 1;
+      sectionFeed.querySelector('.like-number').textContent = soma;
+    };
+
     switch (actionElement) {
+      case 'like':
+        likePost(id, auth.currentUser.uid).then(() => mostraLike());
+        console.log(id);
+        btnLike.setAttribute('class', 'fa fa-heart');
+        break;
+      case 'deslike':
+        likePost(id, auth.currentUser.uid).then(() => esconderLike());
+        btnDeslike.setAttribute('class', 'fa fa-heart-o');
+        break;
       case 'delete-Post':
         modalDelete.style.display = 'flex';
         console.log('abrir o modal');
