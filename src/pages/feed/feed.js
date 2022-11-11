@@ -18,6 +18,7 @@ import { errorFire } from '../../lib/errorFirebase.js';
 const getPostsTemplate = (posts) => {
   const postTemplate = posts.map((post) => {
     const user = current().uid;
+    const liked = post.like.includes(user);
     const crud = post.author === user ? `
     <p class='sectionBtn' data-id='${post.id}' >
       <div class='modal'>
@@ -53,7 +54,7 @@ const getPostsTemplate = (posts) => {
           <section>${crud}</section>
         </section>
         <section class='sectionBtnLikeDeslike'>
-          <button class='btnLike' data-count-likes="${post.like.length}" data-id='${post.id}' data-action='like' data-banana='deslike' style="font-size:24px">
+          <button class='btnLike' data-count-likes="${post.like.length}" data-id='${post.id}' data-action='${liked?'dislike':'like'}' style="font-size:24px">
           <i class="fa fa-heart-o"></i></button>
         <div class='like-number'>${post.like.length}</div>
           </section>`;
@@ -120,8 +121,8 @@ export default () => {
     const modalDelete = elementPost.querySelector('.modal-confirm');
     const postElement = elementPost.querySelector(`.sectionPost[data-id='${id}']`);// eslint-disable-line
     const modalEdit = elementPost.querySelector('.modal-edit');
-    const btnLike = elementPost.querySelector('.fa-heart-o');
-    const btnDeslike = element.dataset.banana;
+    const btnLike = elementPost.querySelector('.btnLike');
+    const icon = btnLike.querySelector('i');
 
     const deletePost = () => {
       removePost(id)
@@ -159,11 +160,13 @@ export default () => {
       case 'like':
         likePost(id, auth.currentUser.uid).then(() => mostraLike());
         console.log(id);
-        btnLike.setAttribute('class', 'fa fa-heart');
+        icon.setAttribute('class', 'fa fa-heart');
+        btnLike.dataset.action = 'dislike';
         break;
-      case 'deslike':
+      case 'dislike':
         likePost(id, auth.currentUser.uid).then(() => esconderLike());
-        btnDeslike.setAttribute('class', 'fa fa-heart-o');
+        icon.setAttribute('class', 'fa fa-heart-o');
+        btnLike.dataset.action = 'like';
         break;
       case 'delete-Post':
         modalDelete.style.display = 'flex';
