@@ -54,8 +54,8 @@ const getPostsTemplate = (posts) => {
           <section>${crud}</section>
         </section>
         <section class='sectionBtnLikeDeslike'>
-          <button class='btnLike' data-count-likes="${post.like.length}" data-id='${post.id}' data-action='${liked?'dislike':'like'}' style="font-size:24px">
-          <i class="fa fa-heart-o"></i></button>
+          <button class='btnLike' data-count-likes="${post.like.length}" style="font-size:24px">
+          <i  data-id='${post.id}' data-action='${liked ? 'dislike':'like'}' class="fa fa-heart-o"></i></button>
         <div class='like-number'>${post.like.length}</div>
           </section>`;
   })
@@ -116,7 +116,9 @@ export default () => {
   const elementPost = sectionFeed.querySelector('#post-feed');
   elementPost.addEventListener('click', (e) => {
     const element = e.target;
+    console.log(element)
     const actionElement = element.dataset.action;
+    console.log(actionElement)
     const id = element.dataset.id;
     const modalDelete = elementPost.querySelector('.modal-confirm');
     const postElement = elementPost.querySelector(`.sectionPost[data-id='${id}']`);// eslint-disable-line

@@ -66,10 +66,7 @@ export const getPostById = async (postID) => {
 
 export const likePost = async (postId, userId) => {
   const posts = await postScreen(postId);
-  console.log(posts, postId);
   const post = await getPostById(postId);
-  // eslint-disable-next-line spaced-comment
-  /*const post = posts.filter((post) => post.id === postId)[0];*/
   let likes = post.like;
   const liking = !likes.includes(userId);
 
