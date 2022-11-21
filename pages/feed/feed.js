@@ -4,11 +4,13 @@
 import { logOutUser } from '../../lib/auth.js';
 import {
   createPost,
-  postScreen,
+  getPosts,
   current,
   removePost,
   editPost,
   nameUser,
+  likePost,
+  auth,
 } from '../../lib/firestore.js';
 import { errorFire } from '../../lib/errorFirebase.js';
 
@@ -16,11 +18,12 @@ import { errorFire } from '../../lib/errorFirebase.js';
 const getPostsTemplate = (posts) => {
   const postTemplate = posts.map((post) => {
     const user = current().uid;
+    const liked = post.like.includes(user);
     const crud = post.author === user ? `
     <p class='sectionBtn' data-id='${post.id}' >
       <div class='modal'>
-        <button class='btnDelete' data-id='${post.id}' data-action='delete-Post'><img class='imgDelete' src='../../img/delete.png' alt='Excluir'></button>
-        <button class='btnEditar' data-id='${post.id}' data-action='edit-post'><img class='imgEditar' src='../../img/editar.png' alt='Editar'></button>
+        <button class='btnDelete' data-id='${post.id}'><img class='imgDelete' src='img/delete.png' data-action='delete-Post' alt='Excluir'></button>
+        <button class='btnEditar' data-id='${post.id}'><img class='imgEditar' src='img/editar.png' data-action='edit-post' data-id='${post.id}' alt='Editar'></button>
       </div>
       <section>
         <div class='modal-confirm'>
@@ -48,10 +51,14 @@ const getPostsTemplate = (posts) => {
             <p class='date'>${post.date}</p>
           </div>
           <textarea data-id='${post.id}'class='textPost' disabled='' style='resize: none' rows='3' cols='40'>${post.text}</textarea>
-          <section>${crud}</section>
-        </section>
-        <section class='sectionBtnLikeDeslike'>
-          <button class='btnLike' id='btn-like'><img src='../../img/like.png' alt='Like'></button>
+          <div class='sectionBtnCrud'>
+            <section class='sectionBtnLikeDeslike'>
+              <button class='btnLike' style="font-size:24px; color:#e96f2c">
+              <i data-id='${post.id}' data-action='${liked ? 'dislike' : 'like'}' class="fa fa-heart-o"></i></button>
+              <div class='like-number'>${post.like.length}</div>
+            </section>
+            <section>${crud}</section>
+          </div>
         </section>
       </section>`;
   })
@@ -63,40 +70,47 @@ export default () => {
   const sectionFeed = document.createElement('div');
   //Template do feed
   sectionFeed.innerHTML = `
-  <header class='headerFeed'>
-    <img src='../../img/logoTranp.png' class='loginhoFeed' alt='Logo Peq Wanderlust'>
-  </header>
-  <nav class='navBar'>
-    <ul class='sectionSobreEperfil'>
-      <a class='btnSIgnInOut' id='logOut'><img src='../../img/btnSair.png' alt='seta para sair'</a>
-      <a href='#sobre' class='sobrepageFeed'>SOBRE</a>
-      <a href='#perfil' class='perfilFeed'>PERFIL</a>
-    </ul>
-  </nav>
-  <section class='msgBoasvindas'>
-    <img src=${current().photoURL} alt='User' class='fotoUser'>
-    <p class='nomeUser'> Olá, ${nameUser()}!</p>
-  </section>
-  <div class='bodyFeed'>
-    <div clas='corpotimeline'>
-      <form id='create-Post'>
-        <section class='boxModelPost'>
-          <form>
-            <form class='sectionTextarea'>
-              <textarea id='text-publish' style='resize: none' class='inputText' rows='3' cols='40' placeholder='Escreva detalhes sobre a estadia em sua residência...'></textarea>
-            </form>
-            <p class='sectionBtnPubli'>
-              <button type='submit' id='publish-btn' class='publicBtn'>Publicar</button>
-            </p>
-          </form>
-        </section>
-        <section class='principalTimeline' id='post-feed'></section>
-      </form> 
-     <footer class='footer'>
-        <p>&copy; 2022 Criado e Desenvolvido por Aghatha, Andresa e Ariane para o Bootcamp SAP008 Laboratoria</p>
-      </footer>
+  <div>
+    <header class='headerFeed'>
+      <img src='img/logoTranp.png' class='loginhoFeed' alt='Logo Peq Wanderlust'>
+    </header>
+    <nav class='navBar'>
+      <ul class='sectionSobreEperfil'>
+        <a class='btnSIgnInOut' id='logOut'><img src='img/btnSair.png' alt='seta para sair'</a>
+        <a href='#sobre' class='sobrepageFeed'>SOBRE</a>
+        <a href='#perfil' class='perfilFeed'>PERFIL</a>
+      </ul>
+    </nav>
+    <section class='msgBoasvindas'>
+      <div class='containerFotoeNome'>
+        <img src=${current().photoURL} alt='User' class='fotoUser'>
+        <p class='nomeUser'> Olá, ${nameUser()}!</p>
+      </div>
+    </section>
+    <div class='bodyFeed'>
+      <div clas='corpotimeline'>
+        <form id='create-Post'>
+          <div class='principalPublicPost'>
+            <section class='boxModelPostPublic'>
+              <div>
+                <form class='sectionTextarea'>
+                  <textarea id='text-publish' style='resize: none' class='inputText' rows='3' cols='40' placeholder='Escreva detalhes sobre a estadia em sua residência...'></textarea>
+                </form>
+                <p class='sectionBtnPubli'>
+                  <button type='submit' id='publish-btn' class='publicBtn'>Publicar</button>
+                </p>
+              </div>
+            </section>
+          </div>
+          <section class='principalTimeline' id='post-feed'></section>
+        </form> 
+      </div>
     </div>
-  </div> `;
+    <footer class='footer'>
+      &copy; 2022 Criado e Desenvolvido por Aghatha, Andresa e Ariane para o Bootcamp SAP008 Laboratoria
+    </footer>
+  </div>
+ `;
 
   const createform = sectionFeed.querySelector('#create-Post');
   const textAreaPost = sectionFeed.querySelector('#text-publish');
@@ -104,7 +118,7 @@ export default () => {
 
   //printando post na tela
   async function printPost() {
-    const posts = await postScreen();
+    const posts = await getPosts();
     sectionFeed.querySelector('#post-feed').innerHTML = getPostsTemplate(posts);
   }
 
@@ -160,7 +174,29 @@ export default () => {
         });
     };
 
+    const mostraLike = () => {
+      const conta = element.parentElement.nextElementSibling.textContent;
+      const soma = Number(conta) + 1;
+      element.parentElement.nextElementSibling.textContent = soma;
+    };
+
+    const esconderLike = () => {
+      const conta = element.parentElement.nextElementSibling.textContent;
+      const soma = Number(conta) - 1;
+      element.parentElement.nextElementSibling.textContent = soma;
+    };
+
     switch (actionElement) {
+      case 'like':
+        likePost(id, auth.currentUser.uid).then(() => mostraLike());
+        element.setAttribute('class', 'fa fa-heart');
+        element.dataset.action = 'dislike';
+        break;
+      case 'dislike':
+        likePost(id, auth.currentUser.uid).then(() => esconderLike());
+        element.setAttribute('class', 'fa fa-heart-o');
+        element.dataset.action = 'like';
+        break;
       case 'delete-Post':
         modalDelete.style.display = 'flex';
         break;
